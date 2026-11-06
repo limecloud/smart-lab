@@ -6,6 +6,8 @@
 
 ![可自由旋转的三维机器人近景](docs/evidence/screenshots/physical-robot.png)
 
+![电脑工位与真实任务状态屏幕](docs/evidence/screenshots/physical-computer.png)
+
 当前为参考设计，尚未取得对应现场的完整 CAD 或多角度采集，不能当作原图实物的精确重建。第二版的模型、实际照片材质来源和许可见[三维升级说明](docs/design/physical-v2.md)，进一步的现场重建路线见[真实性分析](docs/design/photorealism.md)。
 
 线上地址：<https://smart-lab.limeai.run>。Cloudflare 版本包含 API、实时推送、任务时钟与持久化，每个浏览器拥有独立仿真会话，见[部署说明](docs/deployment.md)。
@@ -35,7 +37,7 @@ npm start
 ## 使用流程
 
 1. 在“实验总览”的默认“融合孪生”中，拖动旋转、右键平移、滚轮缩放、点击设备。切换 Flare / Sunburst 材质和轨迹图层，点击“启动协同演示”创建真实模拟任务；“写实参考”为固定视角图片，GIF 可预览和下载。
-   “机器人近景”和“分析工位”可近距离检查三维结构，左下角按钮放大工作区，Escape 退出。
+   “机器人近景”“分析工位”“电脑工位”和“电脑背部”可近距离检查三维结构；电脑屏幕同步实际仿真任务，见[工位细节说明](docs/design/workstation-details.md)。左下角按钮放大工作区，Escape 退出。
 2. 在“流程编排”选择模板，配置步骤、目标设备、接驳站和仿真时长，保存流程。
 3. 新建实验任务，选择流程、样品数和优先级。调度器按设备可用性推进步骤。
 4. 在“实验任务”查看步骤与日志，暂停、继续、取消任务；故障修复后可重试失败任务。

@@ -14,6 +14,9 @@ import { buildRobot, buildStation, createMaterials, box } from './scene/models';
 import { buildEnvironment } from './scene/environment';
 import type { LabDevice, LabTask } from '../shared/types';
 import type { TwinModel } from './twinProjection';
+import type { WorkstationDisplay } from './scene/workstation';
+
+export type SceneView = 'overview' | 'robot' | 'analyzer' | 'computer' | 'computer-back';
 
 interface Props {
   devices: LabDevice[];
@@ -25,7 +28,7 @@ interface Props {
   routes?: boolean;
   labels?: boolean;
   tasks?: LabTask[];
-  view?: 'overview' | 'robot' | 'analyzer';
+  view?: SceneView;
 }
 
 interface DeviceModel {
@@ -36,6 +39,7 @@ interface DeviceModel {
   wheels?: THREE.Group[];
   joints?: THREE.Object3D[];
   fingers?: THREE.Object3D[];
+  displays?: WorkstationDisplay[];
   label: THREE.Sprite;
   history: THREE.Vector3[];
   historyLine?: THREE.Line;
@@ -119,7 +123,7 @@ export default function LabScene({ devices, selectedId, onSelect, resetToken, pa
     controls.enableDamping = true;
     controls.dampingFactor = 0.075;
     controls.maxPolarAngle = Math.PI * 0.46;
-    controls.minDistance = 1.8;
+    controls.minDistance = .7;
     controls.maxDistance = 42;
     let cameraTarget: { eye: THREE.Vector3; target: THREE.Vector3 } | undefined;
     changeView.current = (name) => {
@@ -140,6 +144,8 @@ export default function LabScene({ devices, selectedId, onSelect, resetToken, pa
         }) ?? eyes[0];
         cameraTarget = { eye, target };
       } else if (name === 'analyzer') cameraTarget = { eye: new THREE.Vector3(7.5, 2.8, 1.8), target: new THREE.Vector3(3.65, 1.45, -3) };
+      else if (name === 'computer') cameraTarget = { eye: new THREE.Vector3(1.4, 1.95, -1.1), target: new THREE.Vector3(2.02, 1.39, -2.9) };
+      else if (name === 'computer-back') cameraTarget = { eye: new THREE.Vector3(1.05, 1.87, -4.7), target: new THREE.Vector3(2.02, 1.4, -2.99) };
       else cameraTarget = { eye: new THREE.Vector3(12, 9.5, 15), target: new THREE.Vector3(0, 1, 0) };
       container.dataset.view = name;
     };
@@ -192,10 +198,11 @@ export default function LabScene({ devices, selectedId, onSelect, resetToken, pa
       group.userData.deviceId = device.id;
       let arm: THREE.Group | undefined;
       let wheels: THREE.Group[] | undefined;
+      let displays: WorkstationDisplay[] | undefined;
       if (device.kind === 'robot') {
         const rig = buildRobot(group, m, device.id); arm = rig.arm; wheels = rig.wheels;
         box(group, [.21, .11, .006], [.28, .73, .445], surfaces.get('robot-front')!, .004);
-      } else buildStation(group, m, device.id, surfaces.get(device.id === 'station-hood' ? 'hood' : device.id === 'station-storage' ? 'storage' : 'analyzer')!);
+      } else displays = buildStation(group, m, device.id, surfaces.get(device.id === 'station-hood' ? 'hood' : device.id === 'station-storage' ? 'storage' : 'analyzer')!);
       const ring = new THREE.Mesh(new THREE.RingGeometry(device.kind === 'robot' ? 0.86 : 1.65, device.kind === 'robot' ? 0.91 : 1.71, 64), new THREE.MeshBasicMaterial({ color: 0x2eaa9d, transparent: true, opacity: 0.9, side: THREE.DoubleSide }));
       ring.rotation.x = -Math.PI / 2;
       ring.position.y = 0.025;
@@ -206,7 +213,7 @@ export default function LabScene({ devices, selectedId, onSelect, resetToken, pa
       const sprite = label(device.kind === 'robot' ? device.id.toUpperCase().replace('ROBOT', 'AMR') : device.name);
       sprite.position.set(0, device.kind === 'robot' ? 2.25 : 3.1, 0);
       group.add(sprite);
-      const modelEntry: DeviceModel = { group, ring, light: statusLight, arm, wheels, label: sprite, history: [] };
+      const modelEntry: DeviceModel = { group, ring, light: statusLight, arm, wheels, displays, label: sprite, history: [] };
       if (device.kind === 'robot') {
         const color = device.id === 'robot-01' ? 0x16b492 : 0x438bd3;
         const historyLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.8 }));
@@ -293,6 +300,7 @@ export default function LabScene({ devices, selectedId, onSelect, resetToken, pa
         model.label.scale.set(1.8 * labelScale, .28 * labelScale, 1);
         const task = latestTasks.current.find((item) => item.id === device.activeTaskId);
         const step = task?.steps[task.currentStepIndex];
+        model.displays?.forEach((display) => display.update(device, latestTasks.current, latestPaused.current));
         if (model.wheels && !latestPaused.current) {
           const speed = Math.min(.2, Math.hypot(dx, dz) * .3);
           model.wheels.forEach((wheel) => { wheel.rotation.x += speed; });
@@ -330,6 +338,8 @@ export default function LabScene({ devices, selectedId, onSelect, resetToken, pa
       }
       controls.update();
       container.dataset.camera = camera.position.toArray().map((value) => value.toFixed(2)).join(',');
+      const screens = JSON.stringify([...models.current.values()].flatMap((entry) => entry.displays?.map((display) => display.snapshot) ?? []));
+      if (container.dataset.screens !== screens) container.dataset.screens = screens;
       composer.render();
     };
     animate();

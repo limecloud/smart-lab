@@ -23,7 +23,7 @@ try {
   await mkdir(directory, { recursive: true });
   await page.screenshot({ path: `${directory}/physical-console.png`, fullPage: true });
   await page.getByRole('button', { name: '放大三维工作区', exact: true }).click();
-  for (const [name, file] of [['全景', 'overview'], ['机器人近景', 'robot'], ['分析工位', 'analyzer']]) {
+  for (const [name, file] of [['全景', 'overview'], ['机器人近景', 'robot'], ['分析工位', 'analyzer'], ['电脑工位', 'computer'], ['电脑背部', 'computer-back']]) {
     await page.getByRole('button', { name, exact: true }).click();
     await page.waitForTimeout(1800);
     await page.screenshot({ path: `${directory}/physical-${file}.png` });

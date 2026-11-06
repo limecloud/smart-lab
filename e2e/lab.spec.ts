@@ -172,6 +172,40 @@ test('设备模型加载失败可重试恢复精细模型', async ({ page }) => 
   await expect(page.locator('.scene-asset-notice')).toHaveCount(0);
 });
 
+test('电脑正背近景可自由操作，屏幕随实际任务和暂停状态更新', async ({ page, request }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  const stage = page.getByTestId('lab-scene');
+  const screen = async () => JSON.parse((await stage.getAttribute('data-screens')) ?? '[]').find((item: { deviceId: string }) => item.deviceId === 'station-analyzer');
+  await expect.poll(async () => (await screen())?.status).toBe('idle');
+  const workflow = await createWorkflow(request, 120);
+  const response = await request.post('/api/tasks', { data: { workflowId: workflow.id, name: '电脑屏幕同步验收', sampleCount: 3 } });
+  expect(response.status()).toBe(201);
+  const task = await response.json() as LabTask;
+  await request.post('/api/simulation', { data: { paused: false, speed: 4 } });
+  await expect.poll(async () => (await screen())?.taskId).toBe(task.id);
+  await expect.poll(async () => (await screen())?.progress).toBeGreaterThan(0);
+  expect((await screen()).step).toBe('模拟吸光度检测');
+  await page.getByRole('button', { name: '放大三维工作区', exact: true }).click();
+  for (const [name, view] of [['电脑工位', 'computer'], ['电脑背部', 'computer-back']]) {
+    await page.getByRole('button', { name, exact: true }).click();
+    await expect(stage).toHaveAttribute('data-view', view);
+  }
+  await expect.poll(async () => Number((await stage.getAttribute('data-camera'))!.split(',')[2])).toBeLessThan(-4.5);
+  const camera = await stage.getAttribute('data-camera');
+  const rect = (await stage.locator('canvas').boundingBox())!;
+  await page.mouse.move(rect.x + rect.width * .5, rect.y + rect.height * .5);
+  await page.mouse.down();
+  await page.mouse.move(rect.x + rect.width * .6, rect.y + rect.height * .55, { steps: 10 });
+  await page.mouse.up();
+  await expect.poll(async () => stage.getAttribute('data-camera')).not.toBe(camera);
+  await request.patch(`/api/tasks/${task.id}`, { data: { action: 'pause' } });
+  await expect.poll(async () => (await screen())?.taskStatus).toBe('paused');
+  await request.post('/api/simulation', { data: { paused: true } });
+  await expect.poll(async () => (await screen())?.paused).toBe(true);
+  expect(errors).toEqual([]);
+});
+
 test('编辑流程、运行实验、归档结果并导出CSV', async ({ page, request }) => {
   await page.getByRole('button', { name: '流程编排', exact: true }).click();
   await page.getByRole('button', { name: '新建流程', exact: true }).click();
@@ -273,6 +307,9 @@ test('占用中的设备不能切离线，界面显示真实拒绝原因', async
 
 test('窄屏能访问导航并查看数据', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: '电脑工位', exact: true }).click();
+  await expect(page.getByTestId('lab-scene')).toHaveAttribute('data-view', 'computer');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
   await page.getByRole('button', { name: '实验数据', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: '实验数据', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: '导出 CSV', exact: true })).toBeVisible();

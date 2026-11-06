@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { box, cylinder, cable, type Point } from './geometry';
+import { buildWorkstation, type WorkstationDisplay } from './workstation';
+export { box, cylinder, cable } from './geometry';
 
-type Point = [number, number, number];
-type Surface = THREE.Material;
 export function createMaterials() {
   return {
     paint: new THREE.MeshPhysicalMaterial({ color: 0xd7dedf, roughness: .34, metalness: .16, clearcoat: .35, clearcoatRoughness: .32 }),
@@ -22,21 +22,6 @@ export function createMaterials() {
 }
 export type Materials = ReturnType<typeof createMaterials>;
 
-export function box(parent: THREE.Object3D, size: Point, position: Point, surface: Surface, radius = .025) {
-  const geometry = radius > 0 ? new RoundedBoxGeometry(...size, 2, Math.min(radius, ...size.map((v) => v / 2.1))) : new THREE.BoxGeometry(...size);
-  const mesh = new THREE.Mesh(geometry, surface);
-  mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh);
-  return mesh;
-}
-export function cylinder(parent: THREE.Object3D, radius: number, height: number, position: Point, surface: Surface, lowerRadius = radius) {
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(radius, lowerRadius, height, 24), surface);
-  mesh.position.set(...position); mesh.castShadow = true; mesh.receiveShadow = true; parent.add(mesh); return mesh;
-}
-export function cable(parent: THREE.Object3D, points: Point[], radius: number, surface: Surface) {
-  const curve = new THREE.CatmullRomCurve3(points.map((point) => new THREE.Vector3(...point)));
-  const mesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 20, radius, 6, false), surface);
-  mesh.castShadow = true; parent.add(mesh); return mesh;
-}
 function graphic(text: string, background = '#182f3b', foreground = '#94d8de') {
   const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 256;
   const ctx = canvas.getContext('2d')!;
@@ -49,14 +34,15 @@ function graphic(text: string, background = '#182f3b', foreground = '#94d8de') {
   return new THREE.MeshStandardMaterial({ map: texture, emissiveMap: texture, emissive: 0xffffff, emissiveIntensity: .2, roughness: .28 });
 }
 function plaque(parent: THREE.Object3D, text: string, width: number, height: number, position: Point) {
-  return box(parent, [width, height, .006], position, graphic(text, '#d1dadd', '#294b5d'), .002);
-}
-function monitor(parent: THREE.Object3D, m: Materials, x: number, y: number, z: number, title = 'SAMPLE ANALYSIS') {
-  box(parent, [.52, .035, .35], [x, y - .43, z], m.black);
-  box(parent, [.045, .33, .045], [x, y - .25, z], m.aluminum);
-  box(parent, [.65, .43, .055], [x, y, z], m.black, .025);
-  box(parent, [.585, .355, .008], [x, y, z + .031], graphic(title), .006);
-  cylinder(parent, .009, .008, [x + .26, y - .18, z + .036], m.teal).rotation.x = Math.PI / 2;
+  const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 128;
+  const ctx = canvas.getContext('2d')!;
+  ctx.fillStyle = '#dce1df'; ctx.fillRect(0, 0, 1024, 128);
+  ctx.fillStyle = '#54867f'; ctx.fillRect(0, 0, 15, 128);
+  ctx.fillStyle = '#314047'; ctx.font = '500 47px sans-serif'; ctx.textBaseline = 'middle'; ctx.fillText(text, 40, 68, 944);
+  const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+  const backing = box(parent, [width, height, .006], position, new THREE.MeshStandardMaterial({ color: 0xdce1df, roughness: .68 }), .002);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(width * .99, height * .95), new THREE.MeshStandardMaterial({ map: texture, roughness: .68 }));
+  face.position.set(position[0], position[1], position[2] + .0035); parent.add(face); return backing;
 }
 function vent(parent: THREE.Object3D, m: Materials, x: number, y: number, z: number, count = 9, width = .025, reverse = false) {
   const panel = new THREE.Group(); panel.position.set(x, y, z); if (reverse) panel.rotation.y = Math.PI; parent.add(panel);
@@ -145,6 +131,7 @@ export function buildRobot(group: THREE.Group, m: Materials, id: string) {
 }
 
 export function buildStation(group: THREE.Group, m: Materials, id: string, detail: THREE.Material) {
+  const displays: WorkstationDisplay[] = [];
   if (id === 'station-prep') {
     box(group, [3.1, .09, 1.34], [0, 1.09, 0], m.blue, .035);
     box(group, [3.04, .04, 1.28], [0, 1.025, 0], m.black);
@@ -158,13 +145,14 @@ export function buildStation(group: THREE.Group, m: Materials, id: string, detai
     for (const x of [-1.43, -.71]) box(group, [.033, 1, .033], [x, 1.61, -.55], m.steel);
     rack(group, m, -.3, 1.17, .17);
     rack(group, m, -1.07, 1.23, -.34, 2, 5);
-    monitor(group, m, .9, 1.57, -.24, 'SAMPLE PREPARATION');
-    box(group, [.4, .04, .25], [.9, 1.17, .35], m.black);
+    displays.push(buildWorkstation(group, m, [.92, 1.135, -.04], id, false));
     plaque(group, 'PREPARATION / A01', .6, .09, [-.9, 1.06, .678]);
   } else if (id === 'station-analyzer') {
     box(group, [2.8, 1.06, 1.5], [0, .66, 0], m.cabinet, .035);
     box(group, [2.87, .09, 1.57], [0, 1.23, 0], m.black);
     for (const x of [-1.18, 1.18]) for (const z of [-.52, .52]) cylinder(group, .07, .12, [x, .08, z], m.black);
+    box(group, [.013, .044, .06], [-1.402, .06, -.37], m.aluminum, .003);
+    box(group, [.015, .031, .044], [-1.408, .06, -.37], m.rubber, .003);
     for (const x of [-.93, 0, .93]) {
       drawer(group, m, x, .44, .765, .88, .54);
       vent(group, m, x, .94, .767, 10);
@@ -173,6 +161,14 @@ export function buildStation(group: THREE.Group, m: Materials, id: string, detai
     box(group, [2.73, .09, 1.46], [0, 2.57, 0], m.paint);
     box(group, [2.64, 1.25, .065], [0, 1.9, -.7], m.paint);
     for (const x of [-1.31, 1.31]) box(group, [.11, 1.3, 1.45], [x, 1.92, 0], m.paint);
+    for (const sign of [-1, 1]) {
+      const panel = new THREE.Group(); panel.position.set(sign * 1.373, 1.92, 0); panel.rotation.y = sign * Math.PI / 2; group.add(panel);
+      box(panel, [1.18, 1.03, .008], [0, 0, 0], m.rubber, .008);
+      box(panel, [1.164, 1.014, .009], [0, 0, .004], m.paint, .006);
+      bolts(panel, m, [[-.55, -.47, .011], [.55, -.47, .011], [-.55, .47, .011], [.55, .47, .011]], .005);
+      for (let row = 0; row < 7; row++) box(panel, [.32, .007, .002], [.26, -.29 + row * .024, .010], m.rubber, .002);
+      plaque(panel, 'SERVICE PANEL / A03', .32, .038, [-.27, -.35, .011]);
+    }
     box(group, [2.5, .025, 1.23], [0, 1.3, 0], m.steel);
     for (const x of [-.92, -.24, .44]) rack(group, m, x, 1.36, .19, 3, 4);
     for (const x of [-1.05, 1.05]) box(group, [.035, .045, 1.12], [x, 1.47, -.05], m.aluminum);
@@ -187,8 +183,7 @@ export function buildStation(group: THREE.Group, m: Materials, id: string, detai
     box(group, [2.3, .024, .033], [0, 2.48, -.1], new THREE.MeshStandardMaterial({ color: 0xe8faff, emissive: 0xb6e9ff, emissiveIntensity: 1.5 }), .006);
     plaque(group, 'AUTOMATED ANALYSIS / A03', 1.1, .105, [-.5, 2.575, .738]);
     bolts(group, m, [[-1.31, 2.4, .735], [1.31, 2.4, .735], [-1.31, 1.4, .735], [1.31, 1.4, .735]]);
-    monitor(group, m, -1.8, 1.65, .2);
-    box(group, [.58, .035, .4], [-1.8, 1.23, .25], m.steel);
+    displays.push(buildWorkstation(group, m, [-1.98, 1.135, .12], id, true));
   } else if (id === 'station-hood') {
     box(group, [2.8, .95, 1.4], [0, .62, 0], m.cabinet);
     box(group, [2.88, .09, 1.47], [0, 1.15, 0], m.black);
@@ -222,4 +217,5 @@ export function buildStation(group: THREE.Group, m: Materials, id: string, detai
     plaque(group, 'SAMPLE ARCHIVE / A04', 1.1, .1, [0, 2.5, .63]);
   }
   consolidate(group);
+  return displays;
 }
