@@ -1,0 +1,34 @@
+{
+  "browser": {
+    "mode": "launch",
+    "executable_path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "headless": true
+  },
+  "start_url": { "url": "http://127.0.0.1:4313/", "query": [] },
+  "environment": {
+    "viewport": { "width": 1512, "height": 982, "device_scale_factor": 1 },
+    "locale": "zh-CN",
+    "timezone": "Asia/Shanghai"
+  },
+  "actions": [
+    { "step_id": "wait-live-state", "action": "wait_for", "locator": { "kind": "css", "selector": ".connection.online" }, "state": "visible", "timeout_ms": 20000 },
+    { "step_id": "set-simulation-speed", "action": "select_option", "locator": { "kind": "role", "role": "combobox", "name": "仿真运行速度" }, "value": { "source": "literal", "value": "4" }, "timeout_ms": 10000 },
+    { "step_id": "open-create-task", "action": "click", "locator": { "kind": "role", "role": "button", "name": "新建实验" }, "timeout_ms": 10000 },
+    { "step_id": "choose-workflow", "action": "select_option", "locator": { "kind": "role", "role": "combobox", "name": "实验流程" }, "value": { "source": "literal", "value": "workflow-standard" }, "timeout_ms": 10000 },
+    { "step_id": "name-task", "action": "fill", "locator": { "kind": "role", "role": "textbox", "name": "任务名称" }, "value": { "source": "literal", "value": "REA 运行验收" }, "timeout_ms": 10000 },
+    { "step_id": "set-sample-count", "action": "fill", "locator": { "kind": "role", "role": "spinbutton", "name": "样品数量" }, "value": { "source": "literal", "value": "2" }, "timeout_ms": 10000 },
+    { "step_id": "create-and-run", "action": "click", "locator": { "kind": "role", "role": "button", "name": "创建并运行" }, "timeout_ms": 10000 },
+    { "step_id": "wait-task-completed", "action": "wait_for", "locator": { "kind": "css", "selector": ".task-detail-summary .badge-completed" }, "state": "visible", "timeout_ms": 30000 },
+    { "step_id": "close-task-details", "action": "click", "locator": { "kind": "role", "role": "button", "name": "关闭对话框" }, "timeout_ms": 10000 },
+    { "step_id": "open-results", "action": "click", "locator": { "kind": "css", "selector": "nav button:nth-child(5)" }, "timeout_ms": 10000 },
+    { "step_id": "wait-results", "action": "wait_for", "locator": { "kind": "css", "selector": ".results-table tbody tr:first-child" }, "state": "visible", "timeout_ms": 10000 },
+    { "step_id": "return-overview", "action": "click", "locator": { "kind": "role", "role": "button", "name": "实验总览" }, "timeout_ms": 10000 },
+    { "step_id": "wait-3d-scene", "action": "wait_for", "locator": { "kind": "css", "selector": "[data-testid=lab-scene] canvas" }, "state": "visible", "timeout_ms": 10000 }
+  ],
+  "capture": {
+    "after_each_step": [],
+    "at_end": ["screenshot", "dom", "url"],
+    "events": ["console", "page-errors", "network"],
+    "network": { "request_body": false, "response_body": false, "header_values": false }
+  }
+}

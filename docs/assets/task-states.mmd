@@ -1,0 +1,13 @@
+stateDiagram-v2
+  [*] --> queued: 创建任务
+  queued --> running: 资源可用
+  queued --> paused: 用户暂停
+  running --> paused: 用户暂停
+  paused --> queued: 继续并等待调度
+  running --> completed: 所有步骤完成
+  running --> failed: 设备故障等执行失败
+  queued --> failed: 无法使用所需设备
+  failed --> queued: 修复条件后重试
+  queued --> cancelled: 取消
+  running --> cancelled: 取消
+  paused --> cancelled: 取消

@@ -1,0 +1,14 @@
+flowchart TB
+  U[实验人员：选择流程与样品] --> UI[React 控制台]
+  UI -->|HTTP 操作| API[Node HTTP API]
+  API --> E[任务调度器与设备资源管理]
+  E --> R[模拟机器人：移动、取样、放样]
+  E --> I[模拟仪器：处理、检测]
+  R --> S[统一状态与事件]
+  I --> S
+  E --> S
+  S --> P[原子 JSON 持久化]
+  S -->|SSE 状态推送| UI
+  UI --> T[Three.js 三维场景]
+  S --> D[关联任务与样品的模拟结果]
+  D --> C[CSV 导出]

@@ -1,0 +1,47 @@
+{
+  "name": "smart-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "智能实验室控制台、三维仿真与实验任务编排",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/limecloud/smart-lab.git"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:server": "tsx watch server/index.ts",
+    "dev:client": "vite --host 127.0.0.1",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.worker.json",
+    "build": "npm run typecheck && vite build && tsc -p tsconfig.server.json",
+    "start": "node dist/server/index.js",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "cf:dev": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "verify:cloudflare": "node scripts/verify-cloudflare.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.181.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261106.1",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.181.0",
+    "@vitejs/plugin-react": "^4.4.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vite": "^6.3.5",
+    "wrangler": "^4.158.0"
+  }
+}

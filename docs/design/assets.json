@@ -1,0 +1,244 @@
+{
+  "date": "2026-11-06",
+  "endpoint": "https://img.aishenji.top/v1",
+  "mode": "imagegen fallback CLI",
+  "models": [
+    "gpt-image-2.6-flare",
+    "gpt-image-2.6-sunburst"
+  ],
+  "generated": [
+    "lab-flare.png",
+    "lab-sunburst.png",
+    "robot-flare-source.png",
+    "robot-sunburst-source.png"
+  ],
+  "prompts": [
+    "docs/design/laboratory-prompt.txt",
+    "docs/design/robot-prompt.txt"
+  ],
+  "postProcessing": "AI-generated images, not photographs. Robot chroma key with true alpha; instrument and chassis front images perspective-corrected into textures on simplified interactive Three.js geometry. GIF/WebP composited from 96 independent backend simulation snapshots, not video-model output or sensor evidence.",
+  "artifacts": [
+    {
+      "file": "public/assets/twin/lab-flare.png",
+      "format": "PNG",
+      "size": [
+        1672,
+        941
+      ],
+      "frames": 1,
+      "bytes": 2403024,
+      "sha256": "859620622688734b17cf6ff46f21822677d59dfe1e0e6d7e46ad0b3772036fc9"
+    },
+    {
+      "file": "public/assets/twin/lab-simulation-poster.jpg",
+      "format": "JPEG",
+      "size": [
+        1120,
+        630
+      ],
+      "frames": 1,
+      "bytes": 192830,
+      "sha256": "32de26ed981a120e3d2440e6ca298bc913f1e3a5f3fdedeeb7d90ea496a03742"
+    },
+    {
+      "file": "public/assets/twin/lab-simulation.gif",
+      "format": "GIF",
+      "size": [
+        1120,
+        630
+      ],
+      "frames": 96,
+      "bytes": 1041543,
+      "sha256": "60d9a98383c1e8835638c18751658adab7afd2f9ff9a3910801a31757cac5169"
+    },
+    {
+      "file": "public/assets/twin/lab-simulation.webp",
+      "format": "WEBP",
+      "size": [
+        1120,
+        630
+      ],
+      "frames": 96,
+      "bytes": 2233268,
+      "sha256": "7b1e6d47a01a248cf9ae6b8299ba72b2e2e49b920ef480485aa2ef481fc60a53",
+      "alphaRange": [
+        255,
+        255
+      ]
+    },
+    {
+      "file": "public/assets/twin/lab-sunburst.png",
+      "format": "PNG",
+      "size": [
+        1672,
+        941
+      ],
+      "frames": 1,
+      "bytes": 2435386,
+      "sha256": "709b79323605c308891b1547936d2cceaba6ed119a802ed5fc43cda8e22a8500"
+    },
+    {
+      "file": "public/assets/twin/robot-flare-source.png",
+      "format": "PNG",
+      "size": [
+        1254,
+        1254
+      ],
+      "frames": 1,
+      "bytes": 1792911,
+      "sha256": "3578de38c8b61ec35e19b1ae45a76e22e13eeea202b5469318d3be230c15b45d"
+    },
+    {
+      "file": "public/assets/twin/robot-flare.png",
+      "format": "PNG",
+      "size": [
+        656,
+        642
+      ],
+      "frames": 1,
+      "bytes": 358837,
+      "sha256": "694981b7151864627ab4a859073b0532896d7991069d140ecc594f4d31ccdf3a",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "public/assets/twin/robot-sunburst-source.png",
+      "format": "PNG",
+      "size": [
+        1254,
+        1254
+      ],
+      "frames": 1,
+      "bytes": 1789366,
+      "sha256": "837c12ca8958c89447594691ef1bb6b4f5149874386f715a76971bb038736b5a"
+    },
+    {
+      "file": "public/assets/twin/robot-sunburst.png",
+      "format": "PNG",
+      "size": [
+        656,
+        640
+      ],
+      "frames": 1,
+      "bytes": 367935,
+      "sha256": "e4358ca72cb8993ab40634755f4b3f3bdf972cef9c47de3041e15722898cff9e",
+      "alphaRange": [
+        0,
+        255
+      ]
+    },
+    {
+      "file": "public/assets/twin/textures/flare-analyzer.jpg",
+      "format": "JPEG",
+      "size": [
+        1024,
+        840
+      ],
+      "frames": 1,
+      "bytes": 147704,
+      "sha256": "2214bd9dde5fffd8556206f9c792d7a6413848518c15c2fe031cc0efeefa66df"
+    },
+    {
+      "file": "public/assets/twin/textures/flare-hood.jpg",
+      "format": "JPEG",
+      "size": [
+        960,
+        960
+      ],
+      "frames": 1,
+      "bytes": 120297,
+      "sha256": "6c1176e400ed52f04e854440ce307e08496af49cce4611f9245858eab04c2f9e"
+    },
+    {
+      "file": "public/assets/twin/textures/flare-prep.jpg",
+      "format": "JPEG",
+      "size": [
+        1024,
+        640
+      ],
+      "frames": 1,
+      "bytes": 132614,
+      "sha256": "c06646f4cb85c2ad110c6f220b6327642b7dad6d68bffcb2645ef04ec3a214bd"
+    },
+    {
+      "file": "public/assets/twin/textures/flare-robot-front.jpg",
+      "format": "JPEG",
+      "size": [
+        840,
+        465
+      ],
+      "frames": 1,
+      "bytes": 57398,
+      "sha256": "6d3b380c26345084dff1f1d554d3e34d125ae8c3582b39f6db88a2b03afe3aa4"
+    },
+    {
+      "file": "public/assets/twin/textures/flare-storage.jpg",
+      "format": "JPEG",
+      "size": [
+        840,
+        1000
+      ],
+      "frames": 1,
+      "bytes": 167011,
+      "sha256": "44567a052f513f23e98fa0c9ea8c9a1115c2f499130368b3bfa85590745ec091"
+    },
+    {
+      "file": "public/assets/twin/textures/sunburst-analyzer.jpg",
+      "format": "JPEG",
+      "size": [
+        1024,
+        840
+      ],
+      "frames": 1,
+      "bytes": 146484,
+      "sha256": "f7d1906acc15f84a3cf8d635e68bd71618a80b62b71cfb6bbfee919dea2152d2"
+    },
+    {
+      "file": "public/assets/twin/textures/sunburst-hood.jpg",
+      "format": "JPEG",
+      "size": [
+        960,
+        960
+      ],
+      "frames": 1,
+      "bytes": 136752,
+      "sha256": "80e91d016003db786f32542fa474310d09861078784152531c69cb5d07679e7f"
+    },
+    {
+      "file": "public/assets/twin/textures/sunburst-prep.jpg",
+      "format": "JPEG",
+      "size": [
+        1024,
+        640
+      ],
+      "frames": 1,
+      "bytes": 157599,
+      "sha256": "49e438102a7fb0322810d646e872656a23c9a695499da08f53ad849087258a66"
+    },
+    {
+      "file": "public/assets/twin/textures/sunburst-robot-front.jpg",
+      "format": "JPEG",
+      "size": [
+        840,
+        465
+      ],
+      "frames": 1,
+      "bytes": 82042,
+      "sha256": "31c2c6f0d45b80e43dd4f36b4961b8a8b622bf14ce354bb05455ab29adfa13f8"
+    },
+    {
+      "file": "public/assets/twin/textures/sunburst-storage.jpg",
+      "format": "JPEG",
+      "size": [
+        840,
+        1000
+      ],
+      "frames": 1,
+      "bytes": 161170,
+      "sha256": "e6bd06006fc64e2c3933610b8171f2a0a0276df6fe6c6661085425a2f6f9a9eb"
+    }
+  ],
+  "defaultView": "Interactive Three.js geometry with generated front textures; fixed-camera image view is optional reference."
+}
