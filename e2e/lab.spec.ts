@@ -113,6 +113,9 @@ test('写实双模型、设备热点、图层、缩放与GIF预览可用', async
 test('三维主体加载写实材质，保留轨道操作并实际执行机器人移动', async ({ page, request }) => {
   const stage = page.getByTestId('lab-scene');
   await expect(stage).toHaveAttribute('data-mode', 'fused');
+  await expect(stage).toHaveAttribute('data-generation', 'physical-v2');
+  await expect(stage).toHaveAttribute('data-robot-asset', 'panda-glb', { timeout: 25_000 });
+  await expect(stage).toHaveAttribute('data-hdr', 'ready');
   await expect.poll(async () => Number(await stage.getAttribute('data-textures'))).toBeGreaterThanOrEqual(5);
   const beforeCamera = await stage.getAttribute('data-camera');
   const canvas = stage.locator('canvas');
@@ -131,6 +134,42 @@ test('三维主体加载写实材质，保留轨道操作并实际执行机器�
   await expect.poll(async () => (await state(request)).tasks.filter((task) => ['running', 'queued'].includes(task.status)).length).toBeGreaterThanOrEqual(1);
   await expect.poll(async () => (await state(request)).devices.filter((device) => device.kind === 'robot').some((device, index) => Math.hypot(device.position[0] - before[index][0], device.position[1] - before[index][1]) > .1)).toBe(true);
   await expect(page.locator('.twin-active-strip')).toContainText('当前执行');
+});
+
+test('三维设备近景、放大工作区和自由相机保留交互', async ({ page }) => {
+  const stage = page.getByTestId('lab-scene');
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await expect(stage).toHaveAttribute('data-robot-asset', 'panda-glb', { timeout: 25_000 });
+  const before = await stage.boundingBox();
+  await page.getByRole('button', { name: '放大三维工作区', exact: true }).click();
+  await expect(page.locator('.twin-experience')).toHaveClass(/is-expanded/);
+  await expect.poll(async () => (await stage.boundingBox())!.height).toBeGreaterThan(before!.height);
+  await page.getByRole('button', { name: '机器人近景', exact: true }).click();
+  await expect(stage).toHaveAttribute('data-view', 'robot');
+  await page.getByRole('button', { name: '分析工位', exact: true }).click();
+  await expect(stage).toHaveAttribute('data-view', 'analyzer');
+  await expect.poll(async () => Number((await stage.getAttribute('data-camera'))!.split(',')[0])).toBeGreaterThan(7);
+  const camera = await stage.getAttribute('data-camera');
+  const rect = await stage.locator('canvas').boundingBox();
+  await page.mouse.move(rect!.x + rect!.width * .5, rect!.y + rect!.height * .5);
+  await page.mouse.wheel(0, -200);
+  await expect.poll(async () => stage.getAttribute('data-camera')).not.toBe(camera);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.twin-experience')).not.toHaveClass(/is-expanded/);
+  expect(errors).toEqual([]);
+});
+
+test('设备模型加载失败可重试恢复精细模型', async ({ page }) => {
+  await page.route('**/assets/physical/panda-arm.glb', (route) => route.abort('failed'));
+  await page.reload();
+  const stage = page.getByTestId('lab-scene');
+  await expect(stage).toHaveAttribute('data-robot-asset', 'fallback');
+  await expect(page.getByRole('status')).toContainText('设备模型加载失败');
+  await page.unroute('**/assets/physical/panda-arm.glb');
+  await page.getByRole('button', { name: '重新加载', exact: true }).click();
+  await expect(stage).toHaveAttribute('data-robot-asset', 'panda-glb', { timeout: 25_000 });
+  await expect(page.locator('.scene-asset-notice')).toHaveCount(0);
 });
 
 test('编辑流程、运行实验、归档结果并导出CSV', async ({ page, request }) => {

@@ -1,0 +1,24 @@
+Smart Lab visual reference assets
+
+Franka Emika Panda visual meshes are derived from the publicly available
+franka_description and Google DeepMind MuJoCo Menagerie description.
+Menagerie revision: 98a70c569c4c1b6da467a20012f766ee1f8dc521
+Source: https://github.com/google-deepmind/mujoco_menagerie/tree/98a70c569c4c1b6da467a20012f766ee1f8dc521/franka_emika_panda
+License: Apache-2.0, included in PANDA-LICENSE.txt.
+
+Modifications by the Smart Lab project: visual submeshes were converted,
+merged by link/material, indexed, quantized and meshopt-compressed into GLB;
+the joint hierarchy was preserved and a display pose and PBR materials added.
+No MuJoCo physics, collision geometry or real robot controls are included.
+This is a visual reference, not a statement that the screenshot's robots
+are Franka devices or that the model matches an actual installation.
+
+Studio Small 09 HDRI and Concrete Floor 02 photographs/PBR maps:
+Source: Poly Haven, https://polyhaven.com/
+License: CC0 1.0, included in POLYHAVEN-CC0.txt.
+The lab-floor-albedo.jpg is a desaturated, low-contrast, tinted derivative.
+Source URLs and hashes are recorded in SOURCES.json.
+
+The mobile base and laboratory equipment geometry are independent reference
+designs created for Smart Lab. AI generated reference images are separately
+documented in docs/design/README.md; they are not photographs of real devices.

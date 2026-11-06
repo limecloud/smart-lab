@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Activity, Bot, Box, CheckCircle2, CircleDot, Film, Focus, Layers3, LoaderCircle, Minus, MousePointer2, Play, Plus, Route, ScanLine, X } from 'lucide-react';
+import { Activity, Bot, Box, CheckCircle2, CircleDot, Film, Focus, Layers3, LoaderCircle, Maximize2, Minimize2, Minus, MousePointer2, Play, Plus, Route, ScanLine, X } from 'lucide-react';
 import type { LabDevice, LabTask } from '../shared/types';
 import LabScene from './LabScene';
 import { dockingPosition, projectDeviceAnchor, projectPosition, type Point2D, type TwinModel } from './twinProjection';
@@ -38,6 +38,8 @@ function useImageAsset(source: string) {
 
 export default function TwinScene({ devices, tasks, selectedId, onSelect, resetToken, paused, onStartDemo, busy }: Props) {
   const [mode, setMode] = useState<'realistic' | 'fused'>('fused');
+  const [view, setView] = useState<'overview' | 'robot' | 'analyzer'>('overview');
+  const [expanded, setExpanded] = useState(false);
   const [model, setModel] = useState<TwinModel>('flare');
   const [routes, setRoutes] = useState(true);
   const [labels, setLabels] = useState(true);
@@ -64,6 +66,15 @@ export default function TwinScene({ devices, tasks, selectedId, onSelect, resetT
     window.addEventListener('keydown', closePreview);
     return () => window.removeEventListener('keydown', closePreview);
   }, [preview]);
+
+  useEffect(() => {
+    if (!expanded) return;
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setExpanded(false); };
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', close);
+    return () => { document.body.style.overflow = previous; window.removeEventListener('keydown', close); };
+  }, [expanded]);
 
   useEffect(() => { setZoom(1); setOffset({ x: 0, y: 0 }); setLocalReset((value) => value + 1); }, [resetToken]);
   useEffect(() => { setRobotErrors([]); setPaths({}); }, [model]);
@@ -95,7 +106,7 @@ export default function TwinScene({ devices, tasks, selectedId, onSelect, resetT
     setOffset({ x: Math.min(bound, Math.max(-bound, dragging.current.originX + event.clientX - dragging.current.x)), y: Math.min(bound, Math.max(-bound, dragging.current.originY + event.clientY - dragging.current.y)) });
   }
 
-  return <div className={`twin-experience ${mode === 'fused' ? 'is-3d' : ''}`}>
+  return <div className={`twin-experience ${mode === 'fused' ? 'is-3d' : ''} ${expanded ? 'is-expanded' : ''}`}>
     <div className="twin-mode-bar"><div className="twin-mode-switch" aria-label="数字孪生视图模式"><button aria-pressed={mode === 'fused'} className={mode === 'fused' ? 'active' : ''} onClick={() => setMode('fused')}><Box size={14} />融合孪生</button><button aria-pressed={mode === 'realistic'} className={mode === 'realistic' ? 'active' : ''} onClick={() => setMode('realistic')}><ScanLine size={14} />写实参考</button></div><div className="twin-layer-controls"><select aria-label="写实素材模型" value={model} onChange={(event) => setModel(event.target.value as TwinModel)}><option value="flare">Flare 材质</option><option value="sunburst">Sunburst 材质</option></select><button className={routes ? 'active' : ''} aria-label="显示移动轨迹" aria-pressed={routes} onClick={() => setRoutes((value) => !value)} title="移动轨迹"><Route size={15} /><span>轨迹</span></button><button className={labels ? 'active' : ''} aria-label="显示设备标签" aria-pressed={labels} onClick={() => setLabels((value) => !value)} title="设备标签"><Layers3 size={15} /><span>标签</span></button><button aria-label="预览仿真演示 GIF" title="预览仿真演示 GIF" onClick={() => { setPreview(true); setGifError(false); }}><Film size={15} /><span>演示</span></button></div></div>
 
     {mode === 'realistic' && imageReady ? <div ref={stage} className={`twin-stage ${zoom > 1 ? 'can-pan' : ''}`} data-testid="lab-scene" data-mode="realistic" data-model={model} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={() => { dragging.current = null; }} onPointerCancel={() => { dragging.current = null; }}>
@@ -132,9 +143,9 @@ export default function TwinScene({ devices, tasks, selectedId, onSelect, resetT
       <div className="twin-zoom-tools"><button aria-label="放大写实场景" disabled={zoom >= 2} onClick={() => zoomBy(0.2)}><Plus size={16} /></button><span>{Math.round(zoom * 100)}%</span><button aria-label="缩小写实场景" disabled={zoom <= 1} onClick={() => { zoomBy(-0.2); if (zoom <= 1.2) setOffset({ x: 0, y: 0 }); }}><Minus size={16} /></button><i /><button aria-label="重置写实视角" onClick={() => { setZoom(1); setOffset({ x: 0, y: 0 }); }}><Focus size={16} /></button></div>
       <div className="twin-hud-bottom"><span><i className="mint" />AMR-01<i className="blue" />AMR-02<span className="hud-divider" />{devices.filter((device) => device.status !== 'offline' && device.status !== 'fault').length}/{devices.length} 设备在线</span><span><MousePointer2 size={11} />点击设备查看遥测</span></div>
       {offlineCount > 0 && <div className="twin-alert"><span />{offlineCount} 台设备异常 · 请检查设备状态</div>}
-    </div> : <div className="twin-3d-fallback fused-scene"><LabScene devices={devices} selectedId={selectedId} onSelect={onSelect} resetToken={resetToken + localReset} paused={paused} model={model} routes={routes} labels={labels} tasks={tasks} />{mode === 'realistic' ? <div className="asset-loading-note"><LoaderCircle size={13} className="spin" />写实素材加载中，当前显示交互式 3D 仿真</div> : <><div className="fused-scene-hud"><span className="twin-live-pill"><span className={paused ? 'paused' : ''} />AI MATERIALS × LIVE 3D<em>仿真</em></span><span>左键旋转 · 右键平移 · 滚轮缩放</span></div>{!activeTask && <div className="fused-empty-prompt"><span><Bot size={16} />当前无运行任务，点击右下角启动协同演示</span></div>}{labels && <div className="fused-device-selector" aria-label="场景设备选择">{devices.map((device) => <button key={device.id} className={selectedId === device.id ? 'selected' : ''} aria-label={`选择设备 ${device.name}`} aria-pressed={selectedId === device.id} onClick={() => onSelect(device.id)}><span className={device.status} />{device.kind === 'robot' ? device.id.replace('robot', 'AMR').toUpperCase() : shortNames[device.id] ?? device.name}</button>)}</div>}</>}</div>}
+    </div> : <div className="twin-3d-fallback fused-scene"><LabScene devices={devices} selectedId={selectedId} onSelect={onSelect} resetToken={resetToken + localReset} paused={paused} model={model} routes={routes} labels={labels} tasks={tasks} view={view} />{mode === 'realistic' ? <div className="asset-loading-note"><LoaderCircle size={13} className="spin" />写实素材加载中，当前显示交互式 3D 仿真</div> : <><div className="fused-scene-hud"><span className="twin-live-pill"><span className={paused ? 'paused' : ''} />PHYSICAL MATERIALS · LIVE 3D<em>仿真</em></span><span>左键旋转 · 右键平移 · 滚轮缩放</span></div><div className="scene-camera-tools" aria-label="三维视角"><button className={view === 'overview' ? 'active' : ''} aria-pressed={view === 'overview'} onClick={() => setView('overview')}>全景</button><button className={view === 'robot' ? 'active' : ''} aria-pressed={view === 'robot'} onClick={() => setView('robot')}>机器人近景</button><button className={view === 'analyzer' ? 'active' : ''} aria-pressed={view === 'analyzer'} onClick={() => setView('analyzer')}>分析工位</button></div>{!activeTask && <div className="fused-empty-prompt"><span><Bot size={16} />当前无运行任务，点击右下角启动协同演示</span></div>}{labels && <div className="fused-device-selector" aria-label="场景设备选择">{devices.map((device) => <button key={device.id} className={selectedId === device.id ? 'selected' : ''} aria-label={`选择设备 ${device.name}`} aria-pressed={selectedId === device.id} onClick={() => onSelect(device.id)}><span className={device.status} />{device.kind === 'robot' ? device.id.replace('robot', 'AMR').toUpperCase() : shortNames[device.id] ?? device.name}</button>)}</div>}</>}</div>}
 
-    <div className="fused-interaction-bar"><span><MousePointer2 size={12} />{mode === 'fused' ? '三维仿真空间 · AI 图像材质 · 点击设备查看遥测' : '固定相机图像仅作视觉参考，返回融合孪生可自由操作'}</span><button className="button primary small" aria-label="启动协同演示" disabled={busy} onClick={onStartDemo}>{busy ? <LoaderCircle size={13} className="spin" /> : <Play size={13} />}启动协同演示</button></div>
+    <div className="fused-interaction-bar"><button className="scene-expand-button" aria-label={expanded ? '退出放大工作区' : '放大三维工作区'} aria-pressed={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}</button><span><MousePointer2 size={12} />{mode === 'fused' ? '三维设备模型 · 实拍 PBR 与 HDR 光照 · 点击设备查看遥测' : '固定相机图像仅作视觉参考，返回融合孪生可自由操作'}</span><button className="button primary small" aria-label="启动协同演示" disabled={busy} onClick={onStartDemo}>{busy ? <LoaderCircle size={13} className="spin" /> : <Play size={13} />}启动协同演示</button></div>
 
     <div className="twin-active-strip"><span className={`strip-icon ${activeTask ? 'active' : ''}`}>{activeTask ? <Activity size={17} /> : <CheckCircle2 size={17} />}</span><div><span>{activeTask ? '当前执行' : '系统就绪'}</span><strong>{activeStep?.name ?? '所有工作站就绪，等待实验任务'}</strong></div>{activeTask && <><div className="strip-progress"><i style={{ width: `${Math.round(activeTask.progress * 100)}%` }} /></div><span className="strip-percent">{Math.round(activeTask.progress * 100)}%</span><span className="strip-step">{activeTask.currentStepIndex + 1} / {activeTask.steps.length} 步骤</span></>}<span className="strip-simulation">模拟设备 · 实时状态</span></div>
 

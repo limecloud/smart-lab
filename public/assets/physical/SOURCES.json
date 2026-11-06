@@ -1,0 +1,55 @@
+{
+  "panda": {
+    "repository": "https://github.com/google-deepmind/mujoco_menagerie",
+    "revision": "98a70c569c4c1b6da467a20012f766ee1f8dc521",
+    "path": "franka_emika_panda",
+    "license": "Apache-2.0",
+    "sourceDescription": "Public Franka Panda visual meshes; converted from MJCF visual hierarchy to a web GLB. Mobile base and laboratory are independent reference designs.",
+    "output": {
+      "file": "panda-arm.glb",
+      "bytes": 2079668,
+      "uncompressedBytes": 10371324,
+      "sourceVertices": 397411,
+      "sourceTriangles": 134888,
+      "drawCalls": 25,
+      "sha256": "09d9b781803f901a79e0b5ea65d6fda3ef1654e0b7cf96e7c5b6a86a7747da0d",
+      "modifications": "Merged and indexed visual submeshes by link/material; preserved seven revolute joints and two fingers; updated PBR materials and display pose. Quantized and meshopt-compressed via gltfpack, without triangle simplification. No collision or control dynamics exported."
+    }
+  },
+  "photographicAssets": [
+    {
+      "file": "public/assets/physical/studio_small_09-hdri.hdr",
+      "source": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+      "license": "CC0-1.0",
+      "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+      "bytes": 1615248
+    },
+    {
+      "file": "public/assets/physical/concrete_floor_02-diffuse.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_02/concrete_floor_02_diff_1k.jpg",
+      "license": "CC0-1.0",
+      "sha256": "6db84a6d87dc50508b9d134d6fbd2b7e876b8081a5f43a118a249ca18de73af5",
+      "bytes": 776097
+    },
+    {
+      "file": "public/assets/physical/concrete_floor_02-rough.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_02/concrete_floor_02_rough_1k.jpg",
+      "license": "CC0-1.0",
+      "sha256": "c7f026a611b7859903c61ec7fd4574944157223e9e7796413dd6e2a66eaeac7a",
+      "bytes": 318550
+    },
+    {
+      "file": "public/assets/physical/concrete_floor_02-nor_gl.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_02/concrete_floor_02_nor_gl_1k.jpg",
+      "license": "CC0-1.0",
+      "sha256": "fcda391b57a816d646ae15544688be53790478da5cd48dbe514b3c6901415e61",
+      "bytes": 192757
+    }
+  ],
+  "floorDerivative": {
+    "file": "public/assets/physical/lab-floor-albedo.jpg",
+    "source": "concrete_floor_02-diffuse.jpg",
+    "processing": "Desaturated, reduced contrast, and blended with a resin-floor tint. Reference design material, not a measured laboratory surface.",
+    "sha256": "ccd6fb25cebca12872b45f271eab6735cf2e383d5413ec4bf430ee34cce7979f"
+  }
+}
