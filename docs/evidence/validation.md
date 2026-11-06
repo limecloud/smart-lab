@@ -11,7 +11,7 @@
 | 本机 workerd 验收 | 通过 | Wrangler 4.158.0，独立会话、SSE、任务暂停/恢复、机器人移动、两个结果、CSV、材质 |
 | REA 初次浏览器场景 | 部分完成，定位器失败 | 创建实验与等待完成已执行；结果表定位器匹配多个行，后续动作取消 |
 | REA 修正场景后复验 | 13 个声明动作全部完成，结束截图/DOM/URL已采集 | 仅执行一轮复验；网络采集仍有 SSE 长连接未结束的完整性边界，见 [REA 记录](rea.md) |
-| Cloudflare 发布与 HTTPS 功能验收 | 通过，存在本机 DNS 缓存边界 | 完整 API 流程、SSE alarm、访客隔离和浏览器操作；解析映射方式与实际版本见[部署记录](deployment.md) |
+| Cloudflare 发布与 HTTPS 功能验收 | 通过；收尾普通域名请求也通过 | 完整 API 流程、SSE alarm、访客隔离和浏览器操作；初次 DNS 问题与解析映射方式见[部署记录](deployment.md) |
 
 Playwright 报告位于项目运行目录的 `playwright-report/index.html`；`test-results/.last-run.json` 记录 `status=passed`、`failedTests=[]`。这类运行输出可能被后续测试覆盖，不能把当前报告永久归因到未来修改后的代码。
 
@@ -55,4 +55,4 @@ Playwright 报告位于项目运行目录的 `playwright-report/index.html`；`t
 
 没有验证真实导航、机械臂运动规划、夹具标定、现场安全联锁、测量精度或长期无人值守。没有确认原厂算法、协议和性能。当前几何与生成贴图的视觉限制，以及更接近实拍的路线，见[写实化技术分析](../design/photorealism.md)。
 
-公网功能检查已在实际 Cloudflare 服务执行；本机系统域名解析当时仍有 `ENOTFOUND`，因此不把普通系统解析路径列为已通过。功能验收使用公共 DNS 确认的地址，保留正常 HTTPS 主机名及证书校验，详见[部署记录](deployment.md)。
+公网功能检查已在实际 Cloudflare 服务执行；初次本机系统解析返回 `ENOTFOUND`，完整功能验收使用公共 DNS 确认的地址，保留正常 HTTPS 主机名及证书校验。收尾时普通域名 `curl /api/health` 也已返回成功，详见[部署记录](deployment.md)。
